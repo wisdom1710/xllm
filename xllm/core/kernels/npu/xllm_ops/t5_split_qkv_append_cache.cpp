@@ -64,6 +64,13 @@ t5_split_qkv_append_cache(const torch::Tensor& qkv,
 
   // The kernel copies bit by bit, so an empty cache is handled by the same path
   // as a populated one and needs no special case here.
+  //
+  // EXEC_NPU_CMD resolves aclnnT5SplitQkvAppendCache through dlsym, so this
+  // file compiles and the library loads even when the pinned third_party/xllm_ops
+  // revision predates the operator; the call then fails the CHECK inside the
+  // macro with an explicit "not in libcust_opapi" message. Building a working
+  // binary therefore requires an xllm_ops revision that ships
+  // xllm_ops/t5_split_qkv_append_cache.
   EXEC_NPU_CMD(aclnnT5SplitQkvAppendCache,
                qkv,
                past_key,
